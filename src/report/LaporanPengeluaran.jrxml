@@ -7,23 +7,23 @@
 	<style name="SubTitle" forecolor="#666666" fontName="Arial" fontSize="18"/>
 	<style name="Column header" forecolor="#FFFFFF" fontName="Arial" fontSize="12" isBold="true"/>
 	<style name="Detail" fontName="Arial" fontSize="12"/>
-	<queryString language="SQL">
-		<![CDATA[SELECT pengeluaran.id, tanggal, jenis_anggaran, keterangan,  total FROM
+	<queryString>
+		<![CDATA[SELECT tanggal, jenis_anggaran, keterangan,  total FROM
 (
-	SELECT pengeluaran.id, tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total
+	SELECT tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total
     FROM pengeluaran 
     INNER JOIN anggaran ON pengeluaran.id_anggaran = anggaran.id
     GROUP BY tanggal, pengeluaran.id
-    ORDER BY pengeluaran.id ASC, tanggal ASC
+    ORDER BY pengeluaran.id ASC, tanggal ASC, total ASC
 ) as pengeluaran 
-UNION ALL
-SELECT null, tanggal, '', 'SUB TOTAL', SUM(jumlah) AS total
-FROM pengeluaran GROUP BY tanggal  
-ORDER BY tanggal, jenis_anggaran DESC]]>
+UNION 
+SELECT  tanggal, null, 'SUB TOTAL', SUM(jumlah) AS total
+FROM pengeluaran GROUP BY tanggal
+UNION
+SELECT null, null, 'TOTAL KESELURUHAN', SUM(jumlah) AS total
+FROM pengeluaran
+ORDER BY tanggal DESC, jenis_anggaran DESC]]>
 	</queryString>
-	<field name="id" class="java.lang.Integer">
-		<fieldDescription><![CDATA[]]></fieldDescription>
-	</field>
 	<field name="tanggal" class="java.sql.Date">
 		<fieldDescription><![CDATA[]]></fieldDescription>
 	</field>
@@ -96,7 +96,7 @@ ORDER BY tanggal, jenis_anggaran DESC]]>
 		<band height="17" splitType="Stretch">
 			<frame>
 				<reportElement x="97" y="1" width="705" height="15" uuid="63a6a775-fda6-40c6-bc1c-c0e834a537cf"/>
-				<textField pattern="dd/MM/yyyy">
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 					<reportElement style="Detail" x="241" y="0" width="124" height="15" uuid="bc6da041-b28e-48ba-a36a-ca843f2322e9"/>
 					<textFieldExpression><![CDATA[$F{tanggal}]]></textFieldExpression>
 				</textField>
@@ -115,7 +115,7 @@ ORDER BY tanggal, jenis_anggaran DESC]]>
 					<pen lineWidth="0.5" lineColor="#999999"/>
 				</graphicElement>
 			</line>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement style="Detail" x="0" y="1" width="338" height="15" uuid="b595f025-a8c9-4e3e-a6d1-6be3fcc6615b"/>
 				<textFieldExpression><![CDATA[$F{jenis_anggaran}]]></textFieldExpression>
 			</textField>

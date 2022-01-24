@@ -142,9 +142,7 @@ ORDER BY tanggal, jenis_anggaran DESC]]>
 				<textElement>
 					<font size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[
-new SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id")).format(new java.util.Date())
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id")).format(new java.util.Date())]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

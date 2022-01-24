@@ -641,18 +641,21 @@ public class FormLaporan extends javax.swing.JFrame {
         try {
             File file = new File("src/report/LaporanPengeluaran.jrxml");
             JasperDesign jasperDesign = JRXmlLoader.load(file);
-            String sql = "SELECT pengeluaran.id, tanggal, jenis_anggaran, keterangan,  total FROM\n" +
+            String sql = "SELECT tanggal, jenis_anggaran, keterangan,  total FROM\n" +
                         "(\n" +
-                        "	SELECT pengeluaran.id, tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total\n" +
+                        "	SELECT tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total\n" +
                         "    FROM pengeluaran \n" +
                         "    INNER JOIN anggaran ON pengeluaran.id_anggaran = anggaran.id\n" +
                         "    GROUP BY tanggal, pengeluaran.id\n" +
-                        "    ORDER BY pengeluaran.id ASC, tanggal ASC\n" +
+                        "    ORDER BY pengeluaran.id ASC, tanggal ASC, total ASC\n" +
                         ") as pengeluaran \n" +
-                        "UNION ALL\n" +
-                        "SELECT null, tanggal, '', 'SUB TOTAL', SUM(jumlah) AS total\n" +
-                        "FROM pengeluaran GROUP BY tanggal  \n" +
-                        "ORDER BY tanggal, jenis_anggaran DESC";
+                        "UNION \n" +
+                        "SELECT  tanggal, null, 'SUB TOTAL', SUM(jumlah) AS total\n" +
+                        "FROM pengeluaran GROUP BY tanggal\n" +
+                        "UNION\n" +
+                        "SELECT null, null, 'TOTAL KESELURUHAN', SUM(jumlah) AS total\n" +
+                        "FROM pengeluaran\n" +
+                        "ORDER BY tanggal DESC, jenis_anggaran DESC";
             JRDesignQuery newQuery = new JRDesignQuery();
             newQuery.setText(sql);
             jasperDesign.setQuery(newQuery);
@@ -677,21 +680,23 @@ public class FormLaporan extends javax.swing.JFrame {
                 SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
                 String tanggal1 = String.valueOf(fm.format(jDateChooser_mulai.getDate()));
                 String tanggal2 = String.valueOf(fm.format(jDateChooser_sampai.getDate()));
-                String sql = "SELECT pengeluaran.id, tanggal, jenis_anggaran, keterangan,  total FROM\n" +
-                "(\n" +
-                "	SELECT pengeluaran.id, tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total\n" +
-                "    FROM pengeluaran \n" +
-                "    INNER JOIN anggaran ON pengeluaran.id_anggaran = anggaran.id\n" +
-                "    WHERE tanggal BETWEEN '"+tanggal1+"' AND '"+tanggal2+"'\n" +
-                "    GROUP BY tanggal, pengeluaran.id\n" +
-                "    ORDER BY pengeluaran.id ASC, tanggal ASC\n" +
-                ") as pengeluaran \n" +
-                "UNION ALL\n" +
-                "SELECT null, tanggal, '', 'SUB TOTAL', SUM(jumlah) AS total\n" +
-                "FROM pengeluaran\n" +
-                "WHERE tanggal BETWEEN '"+tanggal1+"' AND '"+tanggal2+"'\n" +
-                "GROUP BY tanggal  \n" +
-                "ORDER BY tanggal, jenis_anggaran DESC";
+                String sql = "SELECT tanggal, jenis_anggaran, keterangan,  total FROM\n" +
+"                (\n" +
+"                	SELECT tanggal, COALESCE(jenis_anggaran, 'SUB TOTAL') as jenis_anggaran, keterangan, SUM(jumlah) AS total\n" +
+"                    FROM pengeluaran \n" +
+"                    INNER JOIN anggaran ON pengeluaran.id_anggaran = anggaran.id\n" +
+"                    WHERE tanggal BETWEEN '"+tanggal1+"' AND '"+tanggal2+"'\n" +
+"                    GROUP BY tanggal, pengeluaran.id\n" +
+"                    ORDER BY pengeluaran.id ASC, tanggal ASC\n" +
+"                ) as pengeluaran \n" +
+"                UNION ALL\n" +
+"                SELECT tanggal, null, 'SUB TOTAL', SUM(jumlah) AS total\n" +
+"                FROM pengeluaran WHERE tanggal BETWEEN '"+tanggal1+"' AND '"+tanggal2+"'\n" +
+"                GROUP BY tanggal\n" +
+"                UNION\n" +
+"                SELECT null, null, 'TOTAL KESELURUHAN', SUM(jumlah) AS total\n" +
+"                FROM pengeluaran WHERE tanggal BETWEEN '"+tanggal1+"' AND '"+tanggal2+"'\n" +
+"                ORDER BY tanggal DESC, jenis_anggaran DESC";
                 JRDesignQuery newQuery = new JRDesignQuery();
                 newQuery.setText(sql);
                 jasperDesign.setQuery(newQuery);
